@@ -27,6 +27,11 @@ class Main extends Component {
         axios.post("/logininfo", {username: username},{headers: {"Content-Type": "application/json"}}).then(res => {
             console.log(res)
         })
+
+        axios.get("/windowcreation").then(res => {
+            console.log(res.data)
+            this.setState({todoWindowsArray: res.data})
+        })
     }
 
     onChange(e){
@@ -35,7 +40,17 @@ class Main extends Component {
 
     onSubmit(e){
         e.preventDefault()
-        
+        const { username } = querystring.parse(window.location.search, {
+            ignoreQueryPrefix: true
+        });
+        axios.post("/windowcreation", {username: username, todoWindows: this.state.todoWindows},{
+            headers: {"Content-Type": "application/json"}
+        }).then(res => {
+            console.log(res)
+        })
+
+        this.setState({todoWindowsCleaner: this.state.todoWindows, todoWindows: ""})
+
     }
     
     render() {
@@ -46,6 +61,15 @@ class Main extends Component {
 
                     <input type="text" value={todoWindows} onChange={this.onChange.bind(this)} />
                 </form>
+                <div>
+                    {todoWindowsArray.map(window => {
+                        return (
+                            <div key={window._id}> 
+                                <p>{window.windowValue} </p>
+                            </div>
+                        )
+                    })}
+                </div>
             </div>
         )
     }
