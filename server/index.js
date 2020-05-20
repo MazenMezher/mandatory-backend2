@@ -8,8 +8,22 @@ const mongoose = require("mongoose");
 const app = express();
 app.use(bodyparser.json());
 
-app.get("/test", function(req, res){
-    res.send("Hello")
+let storeName = "";
+
+app.get("/logininfo", function(req, res){
+    res.send(storeName)
+})
+
+app.post("/logininfo", function(req, res){
+    let name = req.body.username;
+    console.log(name)
+    if(!name){
+        res.status(400)
+        res.json({err: "name is nonexistant"})
+    } else {
+        storeName = name;
+        res.json({name})
+    }
 })
 
 const port = process.env.port || 8000;
