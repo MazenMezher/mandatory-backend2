@@ -19,6 +19,17 @@ let windowLayout = mongoose.Schema({
     windowValue: String,
   })
 
+  let todoLayout = mongoose.Schema({
+      _id: String,
+      todoValue: String,
+      windowcreation: String,
+      description: String,
+      time: String,
+      name: String,
+  })
+
+  let TodoLayout = mongoose.model("todo", todoLayout)
+
 let WindowLayout = mongoose.model("window", windowLayout)
 
 const app = express();
@@ -75,6 +86,42 @@ app.post("/windowcreation", function(req, res){
     }
 })
 
+app.post("/createtodo", (req, res)=> {
+    let todos = req.body;
+    if(!todos.todo){
+        res.status(400)
+        res.json({err: "can not create todo"})
+    } else {
+        let todo = new TodoLayout({
+            _id: keyGenerator.generateKey(),
+            todoValue: todos.todo,
+            windowcreation: todos.createWindow,
+            description: "",
+            time: moment().format('h:mn a'),
+            name: storeName,
+        })
+        todo.save(function(err){
+            if(err){
+                console.log("Unable to save to mongoDB", err)
+            } else {
+                res.json(todos);
+            }
+        })
+
+
+    }
+})
+
+app.get("/createtodo", (req, res ) => {
+    TodoLayout.find({name: storeName}, function(err, data){
+        if(err){
+            console.log("can not find specific data for this name", err)
+        } else {
+            console.log("can send todo to frontend")
+            res.send(data)
+        }
+    })
+})
 
 
 const port = process.env.port || 8000;

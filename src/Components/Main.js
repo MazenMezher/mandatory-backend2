@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import querystring from "query-string";
+import CreateTodos from "./CreateTodos";
 
 class Main extends Component {
     constructor(props) {
@@ -10,6 +11,7 @@ class Main extends Component {
             username: "",
             todoWindows: "",
             todoWindowsArray: [],
+            savedTodos: [],
             todoWindowsCleaner: "",
             activeName: "",
         }
@@ -46,15 +48,24 @@ class Main extends Component {
         axios.post("/windowcreation", {username: username, todoWindows: this.state.todoWindows},{
             headers: {"Content-Type": "application/json"}
         }).then(res => {
+            axios.get("/windowcreation").then(res => {
+                console.log(res.data)
+                this.setState({todoWindowsArray: res.data})
+            })
             console.log(res)
         })
 
         this.setState({todoWindowsCleaner: this.state.todoWindows, todoWindows: ""})
-
     }
     
+    addTodos = () => {
+        axios.get("/createtodo").then(res => {
+            this.setState({savedTodos: res.data})
+        })
+    }
+
     render() {
-        const { todoWindows, todoWindowsArray, activeName } = this.state;
+        const { todoWindows, todoWindowsArray, activeName, savedTodos } = this.state;
         return (
             <div>
                 <form onSubmit={this.onSubmit.bind(this)}>
@@ -66,6 +77,13 @@ class Main extends Component {
                         return (
                             <div key={window._id}> 
                                 <p>{window.windowValue} </p>
+                                {savedTodos.map(todos => {
+                                    console.log(todos)
+                                    if(todos.windowCreation === window.windowValue){
+                                        console.log(todos)
+                                    }
+                                })}
+                                <CreateTodos addTodos={this.addTodos} windowCreation={window.windowValue} />
                             </div>
                         )
                     })}
