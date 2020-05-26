@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import axios from "axios";
 import querystring from "query-string";
 import CreateTodos from "./CreateTodos";
+import { Modal, Button } from "react-bootstrap";
 
 class Main extends Component {
     constructor(props) {
@@ -14,6 +15,10 @@ class Main extends Component {
             savedTodos: [],
             todoWindowsCleaner: "",
             activeName: "",
+            show: false,
+            descriptionValue: "",
+            windowCreationValue: "",
+            todoValue: "",
         }
     }
 
@@ -34,13 +39,17 @@ class Main extends Component {
             console.log(res.data)
             this.setState({todoWindowsArray: res.data})
         })
+
+        axios.get("/createtodo").then(res => {
+            this.setState({savedTodos: res.data})
+        })
     }
 
-    onChange(e){
+    onChange = (e) => {
         this.setState({todoWindows: e.target.value})
     }
 
-    onSubmit(e){
+    onSubmit = (e) =>{
         e.preventDefault()
         const { username } = querystring.parse(window.location.search, {
             ignoreQueryPrefix: true
@@ -57,6 +66,10 @@ class Main extends Component {
 
         this.setState({todoWindowsCleaner: this.state.todoWindows, todoWindows: ""})
     }
+
+    saveOnSubmit =() =>{
+
+    }
     
     addTodos = () => {
         axios.get("/createtodo").then(res => {
@@ -64,8 +77,29 @@ class Main extends Component {
         })
     }
 
+    handleModal = () => {
+        this.setState({show: !this.state.show})
+    }
+
+    onChangeTodoValues= (e) =>{
+        this.setState({todoValue: e.target.value})
+    }
+
+    onChangeDescription =(e) =>{
+        this.setState({descriptionValue: e.target.value})
+    }
+
+    onChangeWindowCreation = (e) =>{
+        this.setState({windowCreationValue: e.target.value})
+    }
+
+    moveCreatedTodo = (value) =>{
+
+
+    }
+
     render() {
-        const { todoWindows, todoWindowsArray, activeName, savedTodos } = this.state;
+        const { todoWindows, todoWindowsArray, activeName, savedTodos, windowCreationValue, descriptionValue, todoValue } = this.state;
         return (
             <div>
                 <form onSubmit={this.onSubmit.bind(this)}>
@@ -79,8 +113,40 @@ class Main extends Component {
                                 <p>{window.windowValue} </p>
                                 {savedTodos.map(todos => {
                                     console.log(todos)
-                                    if(todos.windowCreation === window.windowValue){
-                                        console.log(todos)
+                                    if(todos.windowcreation === window.windowValue){
+                                        return (
+                                            <div> 
+                                                <button onClick={()=> this.handleModal(todos.todoValue)}>{todos.todoValue}</button>
+                                                <Modal show={this.state.show} onHide={this.handleModal}>
+                                                    <Modal.Header closeButton> </Modal.Header>
+                                                    <Modal.Body> 
+                                                        <form onSubmit={this.saveOnSubmit}>
+                                                            <label>Description</label>
+                                                            <input type="text" value={descriptionValue} onChange={this.onChangeDescription.bind(this)} />
+                                                            <br/>
+                                                            <label>Todo-Window</label>
+                                                            <input type="text" value={windowCreationValue} onChange={this.onChangeWindowCreation.bind(this)} />
+                                                            <br/>
+                                                            <label>Todo-Value</label>
+                                                            <input type="text" value={todoValue} onChange={this.onChangeTodoValues.bind(this)} />
+                                                            <br/>
+                                                            <span>{todos.time}</span>
+                                                            <br/>
+                                                            <span>Move-todo</span>
+                                                            {todoWindowsArray.map(windows => {
+                                                                return (
+                                                                    <div onClick={()=> this.moveCreatedTodo(windows.windowValue)}>{windows.windowValue}</div>
+                                                                )
+                                                            })}
+                                                        </form>
+                                                    </Modal.Body>
+                                                    <Modal.Footer>
+                                                        <Button>Save Changes</Button>
+                                                    </Modal.Footer>
+                                                </Modal>
+                                            </div>
+                                        )
+                                        
                                     }
                                 })}
                                 <CreateTodos addTodos={this.addTodos} windowCreation={window.windowValue} />
