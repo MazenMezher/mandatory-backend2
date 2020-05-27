@@ -36,6 +36,7 @@ const app = express();
 app.use(bodyparser.json());
 
 let storeName = "";
+let todoFetchInfo = "";
 
 app.get("/logininfo", function(req, res){
     res.send(storeName)
@@ -107,8 +108,6 @@ app.post("/createtodo", (req, res)=> {
                 res.json(todos);
             }
         })
-
-
     }
 })
 
@@ -119,6 +118,82 @@ app.get("/createtodo", (req, res ) => {
         } else {
             console.log("can send todo to frontend")
             res.send(data)
+        }
+    })
+})
+
+app.post("/gettodoinfo", (req, res) => {
+    let todo = req.body;
+    if(!todo.todo){
+        res.status(400)
+        res.json({err: "can not get todo"})
+    } else {
+        todoFetchInfo = todo.todo;
+        res.json(todo);
+    }
+})
+
+app.get("/gettodoinfo", (req, res) => {
+    TodoLayout.find({todoValue: todoFetchInfo},function(err, data){
+        if(err){
+            console.log("Could not get specific todo", err);
+        } else {
+            res.send(data);
+        }
+    })
+})
+
+app.put("/gettodoinfo/:id", (req, res) => {
+    let todoId = req.params.id;
+    let todoItem = req.body;
+    if(!todoId){
+        res.status(400)
+        res.json({err: "Could not get Id"})
+    } else {
+        TodoLayout.findByIdAndUpdate(todoItem._id, {
+            _id: todoItem._id,
+            todoValue: todoItem.todoValue,
+            windowcreation: todoItem.windowcreation,
+            description: todoItem.description,
+        },function(err){
+            if(err){
+                console.log("Unable to update values", err)
+            } else {
+                console.log("I can update values correctly")
+            }
+        })
+    }
+})
+
+app.delete("/deleteitem/:id",(req, res)=>{
+    let id = req.params.id;
+    TodoLayout.findByIdAndDelete(id, function(err){
+        if(err){
+            console.log("Can not delete todo", err)
+        } else {
+            console.log("managed to delete todo")
+            res.status(204);
+        }
+    })
+})
+
+app.delete("/deletewindow/:windowName", (req, res)=> {
+    let windowName = req.params.windowName;
+    WindowLayout.deleteMany({windowValue: windowName}, function(err){
+        if(err){
+            console.log("can not delete window", err)
+        } else {
+            console.log("window deleted")
+            res.status(204);
+        }
+
+    })
+    TodoLayout.deleteMany({windowcreation: windowName}, function(err){
+        if(err){
+            console.log("can not delete all todos", err)
+        } else {
+            console.log("widow deleted and all its todos")
+            res.status(204);
         }
     })
 })

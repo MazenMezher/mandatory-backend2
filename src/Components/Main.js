@@ -19,6 +19,8 @@ class Main extends Component {
             descriptionValue: "",
             windowCreationValue: "",
             todoValue: "",
+            todoSaveInfo: [],
+            todoId: "",
         }
     }
 
@@ -68,7 +70,18 @@ class Main extends Component {
     }
 
     saveOnSubmit =() =>{
+        this.setState({show: false})
 
+        axios.put("/gettodoinfo/" + this.state.todoId, {
+            description: this.state.descriptionValue,
+            todoValue: this.state.todoValue,
+            windowcreation: this.state.windowCreationValue,
+            _id: this.state.todoId,
+        },{headers: {"Content-Type": "application/json"}}).then(res => {
+            axios.get("/createtodo").then(res => {
+                this.setState({savedTodos: res.data})
+            })
+        })
     }
     
     addTodos = () => {
@@ -77,8 +90,26 @@ class Main extends Component {
         })
     }
 
-    handleModal = () => {
+    handleModal = (todo) => {
         this.setState({show: !this.state.show})
+        
+        axios.post("/gettodoinfo", {todo: todo},{headers: {"Content-Type": "application/json"}}).then(res => {
+            console.log("this is todo post ", res)
+        })
+
+        axios.get("/gettodoinfo").then(res => {
+            this.setState({todoSaveInfo: res.data});
+            res.data.map(todoInfo => {
+                this.setState({
+                        descriptionValue: todoInfo.description,
+                        todoValue: todoInfo.todoValue,
+                        windowCreationValue: todoInfo.windowcreation,
+                        todoId: todoInfo._id,
+                    })
+                console.log(todoInfo)
+            })
+            console.log(res)
+        })
     }
 
     onChangeTodoValues= (e) =>{
@@ -93,10 +124,37 @@ class Main extends Component {
         this.setState({windowCreationValue: e.target.value})
     }
 
-    moveCreatedTodo = (value) =>{
+    moveCreatedTodo = (newDestination) =>{
+        this.setState({show: false});
 
-
+        axios.put("/gettodoinfo/" + this.state.todoId, {
+            description: this.state.descriptionValue,
+            todoValue: this.state.todoValue,
+            windowcreation: newDestination,
+            _id: this.state.todoId,
+        }).then(res => {
+            axios.get("/createtodo").then(res => {
+                this.setState({savedTodos: res.data})
+            })
+        })
     }
+
+    deleteTodoItem = (id) => {
+        axios.delete("/deleteitem/" + id).then(res => {
+            axios.get("/createtodo").then(res => {
+                this.setState({savedTodos: res.data})
+            })
+        })
+    }
+
+    deleteWindow = (windowName) => {
+        axios.delete("/deletewindow/" + windowName).then(res => {
+            axios.get("/createtodo").then(res => {
+                this.setState({savedTodos: res.data})
+            })
+        })
+    }
+
 
     render() {
         const { todoWindows, todoWindowsArray, activeName, savedTodos, windowCreationValue, descriptionValue, todoValue } = this.state;
@@ -111,12 +169,14 @@ class Main extends Component {
                         return (
                             <div key={window._id}> 
                                 <p>{window.windowValue} </p>
+                                <button onClick={() => this.deleteWindow(window.windowValue)}>Delete window</button>
                                 {savedTodos.map(todos => {
                                     console.log(todos)
                                     if(todos.windowcreation === window.windowValue){
                                         return (
                                             <div> 
                                                 <button onClick={()=> this.handleModal(todos.todoValue)}>{todos.todoValue}</button>
+                                                <button onClick={() => this.deleteTodoItem(todos._id)} >Delete Todo</button>
                                                 <Modal show={this.state.show} onHide={this.handleModal}>
                                                     <Modal.Header closeButton> </Modal.Header>
                                                     <Modal.Body> 
@@ -141,7 +201,7 @@ class Main extends Component {
                                                         </form>
                                                     </Modal.Body>
                                                     <Modal.Footer>
-                                                        <Button>Save Changes</Button>
+                                                        <Button onClick={this.saveOnSubmit} >Save Changes</Button>
                                                     </Modal.Footer>
                                                 </Modal>
                                             </div>
