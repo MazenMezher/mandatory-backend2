@@ -29,7 +29,7 @@ class Login extends Component {
         return (
             <div>
                 <form onSubmit={this.onSubmit.bind(this)}>
-                    <p>Username</p>
+                    <p>Submit Username to enter app</p>
                     <input type="text" value={username} onChange={this.onChange.bind(this)} />
                 </form>
             </div>

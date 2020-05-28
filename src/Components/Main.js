@@ -3,6 +3,7 @@ import axios from "axios";
 import querystring from "query-string";
 import CreateTodos from "./CreateTodos";
 import { Modal, Button } from "react-bootstrap";
+import { Redirect } from "react-router-dom";
 
 class Main extends Component {
     constructor(props) {
@@ -21,6 +22,7 @@ class Main extends Component {
             todoValue: "",
             todoSaveInfo: [],
             todoId: "",
+            logOut: false,
         }
     }
 
@@ -30,7 +32,6 @@ class Main extends Component {
         });
         axios.get("/logininfo").then(res => {
             this.setState({activeName: res.data})
-            console.log(res.data)
         })
 
         axios.post("/logininfo", {username: username},{headers: {"Content-Type": "application/json"}}).then(res => {
@@ -38,7 +39,6 @@ class Main extends Component {
         })
 
         axios.get("/windowcreation").then(res => {
-            console.log(res.data)
             this.setState({todoWindowsArray: res.data})
         })
 
@@ -60,16 +60,16 @@ class Main extends Component {
             headers: {"Content-Type": "application/json"}
         }).then(res => {
             axios.get("/windowcreation").then(res => {
-                console.log(res.data)
                 this.setState({todoWindowsArray: res.data})
             })
-            console.log(res)
         })
 
         this.setState({todoWindowsCleaner: this.state.todoWindows, todoWindows: ""})
     }
 
+// saving the different values on submit of a todo
     saveOnSubmit =() =>{
+        window.location.reload(false);
         this.setState({show: false})
 
         axios.put("/gettodoinfo/" + this.state.todoId, {
@@ -106,18 +106,16 @@ class Main extends Component {
                         windowCreationValue: todoInfo.windowcreation,
                         todoId: todoInfo._id,
                     })
-                console.log(todoInfo)
             })
-            console.log(res)
         })
-    }
-
-    onChangeTodoValues= (e) =>{
-        this.setState({todoValue: e.target.value})
     }
 
     onChangeDescription =(e) =>{
         this.setState({descriptionValue: e.target.value})
+    }
+
+    onChangeTodoValues= (e) =>{
+        this.setState({todoValue: e.target.value})
     }
 
     onChangeWindowCreation = (e) =>{
@@ -125,6 +123,7 @@ class Main extends Component {
     }
 
     moveCreatedTodo = (newDestination) =>{
+        window.location.reload(false);
         this.setState({show: false});
 
         axios.put("/gettodoinfo/" + this.state.todoId, {
@@ -140,6 +139,7 @@ class Main extends Component {
     }
 
     deleteTodoItem = (id) => {
+        window.location.reload(false);
         axios.delete("/deleteitem/" + id).then(res => {
             axios.get("/createtodo").then(res => {
                 this.setState({savedTodos: res.data})
@@ -148,6 +148,7 @@ class Main extends Component {
     }
 
     deleteWindow = (windowName) => {
+        window.location.reload(false);
         axios.delete("/deletewindow/" + windowName).then(res => {
             axios.get("/createtodo").then(res => {
                 this.setState({savedTodos: res.data})
@@ -155,15 +156,21 @@ class Main extends Component {
         })
     }
 
+    logOut = () => {
+        this.setState({logOut: true});
+    }
 
     render() {
-        const { todoWindows, todoWindowsArray, activeName, savedTodos, windowCreationValue, descriptionValue, todoValue } = this.state;
+        const { logOut, todoWindows, todoWindowsArray, activeName, savedTodos, windowCreationValue, descriptionValue, todoValue } = this.state;
+        if(logOut){
+            return <Redirect to={`/`} />
+        }
         return (
             <div>
                 <form onSubmit={this.onSubmit.bind(this)}>
-
                     <input type="text" value={todoWindows} onChange={this.onChange.bind(this)} />
                 </form>
+                <button onClick={this.logOut.bind(this)}>LogOut</button>
                 <div>
                     {todoWindowsArray.map(window => {
                         return (
@@ -171,7 +178,6 @@ class Main extends Component {
                                 <p>{window.windowValue} </p>
                                 <button onClick={() => this.deleteWindow(window.windowValue)}>Delete window</button>
                                 {savedTodos.map(todos => {
-                                    console.log(todos)
                                     if(todos.windowcreation === window.windowValue){
                                         return (
                                             <div> 
