@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Redirect } from "react-router-dom";
+import '../App.css';
 
 class Login extends Component {
     constructor(props) {
@@ -27,11 +28,13 @@ class Login extends Component {
             return <Redirect to={`/main?username=${username}`} />
         }
         return (
+            <div className="background">
             <div>
                 <form onSubmit={this.onSubmit.bind(this)}>
-                    <p>Submit Username to enter app</p>
-                    <input type="text" value={username} onChange={this.onChange.bind(this)} />
+                    <p className="loginText">Hit enter to enter app</p>
+                    <input className="loginInput" placeholder="Username" type="text" value={username} onChange={this.onChange.bind(this)} />
                 </form>
+            </div>
             </div>
         )
     }

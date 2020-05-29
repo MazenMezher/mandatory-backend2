@@ -4,7 +4,7 @@ import querystring from "query-string";
 import CreateTodos from "./CreateTodos";
 import { Modal, Button } from "react-bootstrap";
 import { Redirect } from "react-router-dom";
-
+import '../App.css';
 class Main extends Component {
     constructor(props) {
         super(props)
@@ -85,6 +85,7 @@ class Main extends Component {
     }
     
     addTodos = () => {
+        window.location.reload(false);
         axios.get("/createtodo").then(res => {
             this.setState({savedTodos: res.data})
         })
@@ -166,23 +167,23 @@ class Main extends Component {
             return <Redirect to={`/`} />
         }
         return (
-            <div>
+            <div className="backgroundMain">
                 <form onSubmit={this.onSubmit.bind(this)}>
-                    <input type="text" value={todoWindows} onChange={this.onChange.bind(this)} />
+                    <input className="loginInput" placeholder="Create TodoWindow" type="text" value={todoWindows} onChange={this.onChange.bind(this)} />
                 </form>
-                <button onClick={this.logOut.bind(this)}>LogOut</button>
-                <div>
+                <button className="mainWindowButton" onClick={this.logOut.bind(this)}>LogOut</button>
+                <div className="testDiv">
                     {todoWindowsArray.map(window => {
                         return (
                             <div key={window._id}> 
-                                <p>{window.windowValue} </p>
-                                <button onClick={() => this.deleteWindow(window.windowValue)}>Delete window</button>
+                                <p className="mainWindowText">{window.windowValue} </p>
+                                <button className="mainWindowButton" onClick={() => this.deleteWindow(window.windowValue)}>Delete window</button>
                                 {savedTodos.map(todos => {
                                     if(todos.windowcreation === window.windowValue){
                                         return (
                                             <div> 
-                                                <button onClick={()=> this.handleModal(todos.todoValue)}>{todos.todoValue}</button>
-                                                <button onClick={() => this.deleteTodoItem(todos._id)} >Delete Todo</button>
+                                                <button className="mainWindowButton" onClick={()=> this.handleModal(todos.todoValue)}>{todos.todoValue}</button>
+                                                <button className="mainWindowButton" onClick={() => this.deleteTodoItem(todos._id)} >Delete Todo</button>
                                                 <Modal show={this.state.show} onHide={this.handleModal}>
                                                     <Modal.Header closeButton> </Modal.Header>
                                                     <Modal.Body> 
@@ -198,7 +199,7 @@ class Main extends Component {
                                                             <br/>
                                                             <span>{todos.time}</span>
                                                             <br/>
-                                                            <span>Move-todo</span>
+                                                            <span>&#8595; Click To Move Todo &#8595;</span>
                                                             {todoWindowsArray.map(windows => {
                                                                 return (
                                                                     <div onClick={()=> this.moveCreatedTodo(windows.windowValue)}>{windows.windowValue}</div>

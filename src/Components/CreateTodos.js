@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import axios from "axios";
+import "../App.css"
 class CreateTodos extends Component {
 
     constructor(props) {
@@ -41,7 +42,7 @@ class CreateTodos extends Component {
                 </div>
                 <div>
                     <form onSubmit={this.onSubmit.bind(this)}>
-                        <input type="text" value={todos} onChange={this.onChange.bind(this)} />
+                        <input className="loginInput" placeholder="Create Todo" type="text" value={todos} onChange={this.onChange.bind(this)} />
                     </form>
                 </div>
                 
